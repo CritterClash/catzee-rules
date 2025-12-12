@@ -1,6 +1,6 @@
 ﻿namespace yahtzee_rules.tests;
 
-public class UnitTest1
+public class TestMain
 {
     [Fact]
     public void Test1()
