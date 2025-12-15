@@ -67,4 +67,23 @@ public class TestMain
             Assert.Equal(PokerHand.FullHouse, deck.CheckPossibleHandRank());
         }
     }
+
+    [Fact]
+    public void FiveFlushTest()
+    {
+        {
+            MyDeck deck = new MyDeck();
+
+            deck.AddNumberRange(new Card[]
+            {
+                new Card(2, Suit.Hearts),
+                new Card(2, Suit.Hearts),
+                new Card(2, Suit.Hearts),
+                new Card(2, Suit.Hearts),
+                new Card(2, Suit.Hearts)
+            });
+
+            Assert.Equal(PokerHand.FiveFlush, deck.CheckPossibleHandRank());
+        }
+    }
 }

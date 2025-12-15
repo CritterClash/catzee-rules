@@ -36,22 +36,20 @@ public class MyDeck
         if( isFlush && isStraight)
         {
             return PokerHand.StraightFlush;
-
         } 
-        else if (isFlush && !isStraight)
-        {
-            return PokerHand.Flush;
-        }
-        else if (!isFlush && isStraight)
-        {
-            return PokerHand.Straight;
-        }
+        
 
         var counts = numbersInDeck
             .GroupBy(x => x.Number)
             .Select(g => g.Count())
             .OrderByDescending(x => x)
             .ToArray();
+        
+        if (counts[0] == 5 && isFlush) return PokerHand.FiveFlush;
+
+        if (isFlush) return PokerHand.Flush;
+        
+        if (isStraight) return PokerHand.Straight;
 
         // 2) 포카드
         if (counts[0] == 4) return PokerHand.FourOfAKind;
@@ -106,5 +104,5 @@ public enum PokerHand
     FullHouse,
     FourOfAKind,
     StraightFlush,
-    RoyalFlush
+    FiveFlush // 5개 같은 숫자 같은 모양
 }
