@@ -2,59 +2,80 @@
 
 namespace catzee_rules;
 
-public class LibrayMain
-{
-
-}
+public record Card(int Number, string Suit);
 
 public class MyDeck
 {
-    public List<int> numbersInDeck = new List<int>();
-    public void AddNumber(int number)
+    public List<Card> numbersInDeck = new();
+    public void AddNumber(Card newOne)
     {
-        numbersInDeck.Add(number);
+        numbersInDeck.Add(newOne);
     }
-    public void AddNumberRange(int[] numbers)
+    public void AddNumberRange(Card[] numbers)
     {
         numbersInDeck.AddRange(numbers); 
     }
 
-    public HandRanking CheckPossibleHandRank()
+    private bool IsFlush(Card[] hand)
     {
-        var groups = numbersInDeck
-           .GroupBy(x => x)
-           .Select(g => g.Count())
-           .OrderByDescending(x => x)
-           .ToArray();
-        // 2. 스트레이트 체크
+        IDictionary<string, int> countOfEachSuit = new Dictionary<string, int>();
+        countOfEachSuit = hand
+            .GroupBy(x => x.Suit)
+            .Select(s => new KeyValuePair<string, int>(s.Key, s.Count()))
+            .ToDictionary();
+
+        if (countOfEachSuit.Values.Any(s => s >= 5)) return true;
+        else return false;
+    }
+
+    public PokerHand CheckPossibleHandRank()
+    {
+        bool isFlush = IsFlush(numbersInDeck.ToArray());
         bool isStraight = IsStraight(numbersInDeck.ToArray());
 
-        // 3. 족보 판별
-        //if (groups[0] == 4)
-        //    return HandRanking.FourOfAKind;
+        if( isFlush && isStraight)
+        {
+            return PokerHand.StraightFlush;
 
-        if (groups[0] == 3 && groups[1] == 2)
-            return HandRanking.FullHouse;
+        } 
+        else if (isFlush && !isStraight)
+        {
+            return PokerHand.Flush;
+        }
+        else if (!isFlush && isStraight)
+        {
+            return PokerHand.Straight;
+        }
 
-        if (isStraight)
-            return HandRanking.Straight;
+        var counts = numbersInDeck
+            .GroupBy(x => x.Number)
+            .Select(g => g.Count())
+            .OrderByDescending(x => x)
+            .ToArray();
 
-        if (groups[0] == 3)
-            return HandRanking.ThreeOfAKind;
+        // 2) 포카드
+        if (counts[0] == 4) return PokerHand.FourOfAKind;
 
-        if (groups[0] == 2 && groups[1] == 2)
-            return HandRanking.TwoPair;
+        // 3) 풀하우스
+        if (counts[0] == 3 && counts[1] == 2) return PokerHand.FullHouse;
+        
 
-        if (groups[0] == 2)
-            return HandRanking.OnePair;
+        // 6) 트리플
+        if (counts[0] == 3) return PokerHand.ThreeOfAKind;
 
-        return HandRanking.HighCard;
+        // 7) 투페어
+        if (counts[0] == 2 && counts[1] == 2) return PokerHand.TwoPair;
 
+        // 8) 원페어
+        if (counts[0] == 2) return PokerHand.OnePair;
 
+        return PokerHand.HighCard;
     }
-    private static bool IsStraight(int[] hand)
+    
+    private bool IsStraight(Card[] hand)
     {
         var sorted = hand
+            .Select(s => s.Number)
             .Distinct()
             .OrderBy(x => x)
             .ToArray();
@@ -69,21 +90,21 @@ public class MyDeck
             if (sorted[i] != sorted[i - 1] + 1)
                 return false;
         }
-
         return true;
     }
 }
 
 
-
-public enum HandRanking
+public enum PokerHand
 {
     HighCard,
-    Straight,
     OnePair,
     TwoPair,
+    ThreeOfAKind,
+    Straight,
     Flush,
     FullHouse,
+    FourOfAKind,
     StraightFlush,
-    PairFlush
+    RoyalFlush
 }
